@@ -21,17 +21,17 @@ let timer = null;
 let isRunning = false; 
 let lapCount = 0;      
 
-// function formatTime(totalSeconds) {
-//     const hours = Math.floor(totalSeconds / 3600);
-//     const minutes = Math.floor((totalSeconds % 3600) / 60);
-//     const seconds = totalSeconds % 60;
+function formatTime(totalSeconds) {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
-//     const formattedHours = hours.toString().padStart(2, '0');
-//     const formattedMinutes = minutes.toString().padStart(2, '0');
-//     const formattedSeconds = seconds.toString().padStart(2, '0');
+    const formattedHours = hours.toString().padStart(2, '0');
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedSeconds = seconds.toString().padStart(2, '0');
 
-//     return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-// }
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+}
 
 function updateCircleProgress(circle, value, max) {
     const progress = (value / max) * circumference;
@@ -43,15 +43,13 @@ function updateDisplay() {
     const minutes = Math.floor((elapsedTime % 3600) / 60);
     const seconds = elapsedTime % 60;
 
-    // TODO 1: записать в hoursEl, minutesEl, secondsEl значения
-    //         с ведущими нулями (используйте padStart)
-
     const formattedHours = hours.toString().padStart(2, '0');
     const formattedMinutes = minutes.toString().padStart(2, '0');
     const formattedSeconds = seconds.toString().padStart(2, '0');
 
-    // TODO 2: вызвать updateCircleProgress для каждого из трёх кругов
-    //         (max для часов — 24, для минут и секунд — 60)
+    hoursEl.textContent = formattedHours
+    minutesEl.textContent = formattedMinutes
+    secondsEl.textContent = formattedSeconds
 
     updateCircleProgress(hoursCircle, hours, 24);
     updateCircleProgress(minutesCircle, minutes, 60);
@@ -59,22 +57,63 @@ function updateDisplay() {
 }
 
 function start() {
-    if (isRunning) return; // защита от двойного запуска
+    if (isRunning) return;
 
-    // TODO 1: поставить isRunning = true
+    isRunning = true;
 
-    let isRunning = true;
-
-    // TODO 2: запустить setInterval, который каждую секунду
-    //         увеличивает elapsedTime на 1 и вызывает updateDisplay()
-    //         Результат сохраните в переменную timer
-
-    let timer = setInterval(() => {
-        count++;
+    timer = setInterval(() => {
+        elapsedTime++;
+        updateDisplay()
     }, 1000);
 
-    // TODO 3: сделать startBtn неактивной, а stopBtn и lapBtn — активными
-
-    
-
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    lapBtn.disabled = false;
 }
+
+function stop() {
+    
+    console.log(timer)
+    clearInterval(timer);
+
+    timer = null;      
+    isRunning = false; 
+
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    lapBtn.disabled = true;
+}
+
+function recordLap() {
+    if (isRunning) {
+        lapCount++;
+        const currentTime = formatTime(elapsedTime);
+
+        const lapItem = document.createElement("div");
+        lapItem.className = "lap-item";
+        lapItem.innerHTML = `
+            <span class="lap-number">Lap ${lapCount}</span>
+            <span class="lap-time">${currentTime}</span>
+        `;
+
+        lapList.insertBefore(lapItem, lapList.firstChild);
+        lapsContainer.style.display = "block";
+    }
+}
+
+function reset() {
+    
+    stop()
+    
+    lapCount = 0;
+    elapsedTime = 0;
+    updateDisplay()
+  
+    lapList.innerHTML = ""
+    lapsContainer.style.display = "none"
+}
+
+startBtn.addEventListener("click", start);
+stopBtn.addEventListener("click", stop);
+lapBtn.addEventListener("click", recordLap);
+resetBtn.addEventListener("click", reset);
